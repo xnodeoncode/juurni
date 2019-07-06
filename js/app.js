@@ -1,16 +1,15 @@
 
 // ui hooks.
-const btnCreateDb = document.getElementById("btn-create-db");
-btnCreateDb.addEventListener("click", createWebDatabase);
+const btnSave = document.getElementById("btn-save");
+btnSave.addEventListener("click", saveEntry);
 
-const btnNewEntry = document.getElementById("btn-new-entry");
-btnNewEntry.addEventListener("click", addEntry);
-
-const btnViewEntries = document.getElementById("btn-view-entries");
-btnViewEntries.addEventListener("click", getEntries);
+const titleElement = document.getElementById("entry-title");
+const textElement = document.getElementById("entry-text");
 
 // global variable to hold a reference to the database.
 let db = null;
+var postDate = new Date();
+var calendarData = {};
 
 // read all current entries in the 
 function getEntries(){
@@ -30,7 +29,7 @@ function getEntries(){
         if(cursor){
 
             //process current row
-            console.log(`Journal Entry: ${cursor.value.title}, text: ${cursor.value.text}, Date: ${cursor.key}`);
+            console.log(`Journal Entry: ${cursor.value.title}, text: ${cursor.value.text}, Date: ${cursor.value.date}`);
 
             // go to next row. call required for iteration.
             cursor.continue();
@@ -39,12 +38,57 @@ function getEntries(){
 }
 
 // add a record to the datastor using a indexdb transaction.
-function addEntry(){
-    var today = new Date();
+function saveEntry(){
+    
+    //entry template
+    /* journalEntry = {
+        logdate: "getMonth()+getDate()+getFullYear()+getHours()+getMinutes()" 070519731213 (July 5, 1973 12:13 pm) non-utc
+        title:"Title",
+        text: "What happened today?",
+        date: getDate()
+    }*/
+
+    //read from ui elements.
+    let entryTitle = titleElement.value;
+    let entryText = textElement.value;
+
+    // build the long date from the selected post date.
+    let dateString = postDate.toDateString();
+    let timeString = postDate.toTimeString();
+    let fullDateString = dateString + " " + timeString;
+    
+    //build the timestamp from date parts
+    let mm = (postDate.getMonth() + 1).toString();
+    let dd = postDate.getDate().toString();
+    let yy = postDate.getFullYear().toString();
+
+    // the calendar provides the date, the time is calculated based on the current time.
+    let now = new Date();
+    let hh = now.getHours().toString();
+    let min = now.getMinutes().toString();
+
+    // append time to the postDate variable
+    postDate.setHours(now.getHours());
+    postDate.setMinutes(now.getMinutes());
+
+    let keyField = mm + dd + yy + hh + min;
+
+    // if no title is provided then name it untitled.
+    if(entryTitle.length === 0)
+        entryTitle = "Untitled";
+        
+    //if the entry text is blank, just return don't save a blank record.
+    if(entryText.length === 0 || entryText === ""){
+        console.log("warning: entries with no text are not saved.");
+        return;
+    }
+
+    // create an entry object
     const entry = {
-        title: "My first journal entry",
-        date: today,
-        text: "this is my first journal entry."
+        logdate: keyField,
+        title: entryTitle,
+        date: fullDateString,
+        text: entryText
     };
 
     // connect to the datastore that was created in the onupgradeneeded callback.
@@ -58,28 +102,26 @@ function addEntry(){
 
     // add the record to the datastore.
     jEntries.add(entry);
+
+    $('.toast').toast('show');
+    resetForm();
 }
 
-// this process runs on every call. the api verifies  the database and version. If it doesn't exist,
+// this process runs on page launch. the api verifies  the database and version. If it doesn't exist,
 // it is created.
-function createWebDatabase() {
+function openBrowserDB() {
 
-    const dbName = document.getElementById("database-name").value;
-    const dbVersion = document.getElementById("database-version").value;
+    const dbName = "Juurnii";
+    const dbVersion = "1.0";
     const request = indexedDB.open(dbName,dbVersion);
     
     //databases and datastores (tables) are created in this callback.
     request.onupgradeneeded = e => {
+        
         db = e.target.result;
 
-        /* journalEntry = {
-            title:"Title",
-            text: "What happened today?",
-            date: getDate()
-        }*/
-
-        // creat the data store and define the key field.
-        const journalEntry = db.createObjectStore("journal_entries",{keyPath:"date"});
+        // create the data store and define the key field.
+        db.createObjectStore("journal_entries",{keyPath:"logdate"});
         
         console.log(`upgrade is called on database name: ${db.name} version : ${db.version}`);
     };
@@ -96,3 +138,13 @@ function createWebDatabase() {
         console.log('error');
     };
 }
+
+function resetForm(){
+    titleElement.value = "";
+    textElement.value="";
+    titleElement.focus();
+}
+
+
+titleElement.focus();
+openBrowserDB();
