@@ -7,27 +7,9 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         
         <link rel="stylesheet" href="css/calendar.css">
+        <link rel="stylesheet" href="css/app.css">
         <script src="https://unpkg.com/feather-icons"></script>
         <title>Juurnii</title>
-
-        <!--
-            added css declarations to address list item styles on the calendar plugin.
-            This needs to be scoped to the calendar plugin classes.
-        -->
-        <style type="text/css">
-            ul,
-            ol,
-            li {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-
-            /* this class was overridden because the text was cut*/
-            .calendar-hd {
-                line-height: 15px;
-            }
-        </style>
     </head>
     <body>
         <header>
@@ -76,7 +58,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-8">
+                <div class="col-6">
                     <!-- form for creating new entries -->
                     <form>
                         <div class="form-group">
@@ -104,6 +86,11 @@
                         </div>
                     </form>
                 </div>
+                <div class="col-2">
+                    <ul id="postList">
+
+                    </ul>
+                </div>
             </div>
         </div>
         <footer></footer>
@@ -120,40 +107,5 @@
         <!-- application code -->
         <script src="js/app.js" type="text/javascript"></script>
 
-        <!-- initialize calendar -->
-        <script type="text/javascript">
-            $(document).ready(function () {
-                let data = calendarData;
-                let now = new Date();
-                let year = now.getFullYear();
-                let month = now.getMonth();
-                let day = now.getDate();
-
-                // inline
-                let $ca = $('#calendrier').calendar({
-                    view: 'date',
-                    data: data,
-                    monthArray: ['jan', 'fev', 'mar', 'avr', 'mai', 'jui', 'juil', 'aou', 'sep', 'oct', 'nov', 'dec'],
-                    weekArray:['dim','lun','mar','mer','jeu','ven','sam'],
-                    date: new Date(year,month,day),
-                    onSelected: function (view, date, data) {
-                        console.log('view:' + view)
-                        console.log('date:' + date)
-                        console.log('data:' + (data || ''));
-                        
-                        // update the post date on calendar item selection.
-                        postDate = new Date(date);
-
-                        // re-focus after selecting a date.
-                        titleElement.focus();
-                    },
-                    viewChange: function (view, y, m) {
-                        console.log(view, y, m)
-                    }
-                });
-
-                // feather.replace()
-            });
-        </script>
     </body>
 </html>

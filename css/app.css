@@ -1,0 +1,14 @@
+/* Added css declarations to address list item styles on the calendar plugin. */
+
+.calendar ul,
+.calendar ol,
+.calendar li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* this class was overridden because the text was cut*/
+.calendar-hd {
+    line-height: 15px;
+}

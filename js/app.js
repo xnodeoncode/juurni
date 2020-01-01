@@ -7,16 +7,20 @@ const titleElement = document.getElementById("entry-title");
 const textElement = document.getElementById("entry-text");
 
 // global variable to hold a reference to the database.
-let db = null;
+
 var postDate = new Date();
 var calendarData = {};
+var dailyEntries = [];
+let db = null;
 
-// read all current entries in the 
+initiateIndexDB();
+
+// read all current entries in the indexDB
 function getEntries(){
 
     // connect to the data store
     const tx = db.transaction("journal_entries","readonly");
-
+    
     // read the datastore into memory
     const entries = tx.objectStore("journal_entries");
 
@@ -30,6 +34,9 @@ function getEntries(){
 
             //process current row
             console.log(`Journal Entry: ${cursor.value.title}, text: ${cursor.value.text}, Date: ${cursor.value.date}`);
+
+            // add the current value to the collection.
+            dailyEntries.push(cursor.value);
 
             // go to next row. call required for iteration.
             cursor.continue();
@@ -109,7 +116,7 @@ function saveEntry(){
 
 // this process runs on page launch. the api verifies  the database and version. If it doesn't exist,
 // it is created.
-function openBrowserDB() {
+function initiateIndexDB() {
 
     const dbName = "Juurnii";
     const dbVersion = "1.0";
@@ -145,6 +152,39 @@ function resetForm(){
     titleElement.focus();
 }
 
+// set up the calendar
+$(document).ready(function () {
+    let data = calendarData;
+    let now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth();
+    let day = now.getDate();
 
-titleElement.focus();
-openBrowserDB();
+    // inline
+    let $ca = $('#calendrier').calendar({
+        view: 'date',
+        data: data,
+        monthArray: ['jan', 'fev', 'mar', 'avr', 'mai', 'jui', 'juil', 'aou', 'sep', 'oct', 'nov', 'dec'],
+        weekArray:['dim','lun','mar','mer','jeu','ven','sam'],
+        date: new Date(year,month,day),
+        onSelected: function (view, date, data) {
+            console.log('view:' + view)
+            console.log('date:' + date)
+            console.log('data:' + (data || ''));
+            
+            // update the post date on calendar item selection.
+            postDate = new Date(date);
+
+            // re-focus after selecting a date.
+            titleElement.focus();
+        },
+        viewChange: function (view, y, m) {
+            console.log(view, y, m)
+        }
+    });
+
+    // feather.replace()
+    getEntries();
+    titleElement.focus();
+
+});
