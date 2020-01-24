@@ -13,23 +13,55 @@ var calendarData = {};
 var dailyEntries = [];
 let db = null;
 
+// this process runs on page launch. the api verifies  the database and version. If it doesn't exist,
+// it is created.
+function initiateIndexDB() {
+
+    const dbName = "Juurnii";
+    const dbVersion = "1.0";
+    const request = indexedDB.open(dbName,dbVersion);
+    
+    //databases and datastores (tables) are created in this callback.
+    request.onupgradeneeded = e => {
+        
+        db = e.target.result;
+
+        // create the data store and define the key field.
+        db.createObjectStore("journal_entries",{keyPath:"logdate"});
+        
+        console.log(`upgrade is called on database name: ${db.name} version : ${db.version}`);
+    };
+
+    // the datastore can be read/viewed at during this callback.
+    request.onsuccess = e => {
+
+        db = e.target.result;
+        console.log(`success is called on database name: ${db.name} version : ${db.version}`);
+    };
+
+    // there has been an error accessing the database or the datastore.
+    request.onerror = e => {
+        console.log('error');
+    };
+}
+
 initiateIndexDB();
 
 // read all current entries in the indexDB
 function getEntries(){
 
     // connect to the data store
-    const tx = db.transaction("journal_entries","readonly");
+    var tx = db.transaction("journal_entries","readonly");
     
     // read the datastore into memory
-    const entries = tx.objectStore("journal_entries");
+    var entries = tx.objectStore("journal_entries");
 
     // request a curor object to hold the results
-    const request = entries.openCursor();
+    var request = entries.openCursor();
 
     // onsuccess of reading the datasore, obtain the cursor object into a variable.
     request.onsuccess = e=> {
-        const cursor = e.target.result;
+        var cursor = e.target.result;
         if(cursor){
 
             //process current row
@@ -99,51 +131,19 @@ function saveEntry(){
     };
 
     // connect to the datastore that was created in the onupgradeneeded callback.
-    const tx = db.transaction("journal_entries", "readwrite");
+    var tx = db.transaction("journal_entries", "readwrite");
 
     // trap and respond to errors.
     tx.onerror = e=> console.log(`Error! ${e.target.error}`);
 
     // read the datastore into memory.
-    const jEntries = tx.objectStore("journal_entries");
+    var jEntries = tx.objectStore("journal_entries");
 
     // add the record to the datastore.
     jEntries.add(entry);
 
     $('.toast').toast('show');
     resetForm();
-}
-
-// this process runs on page launch. the api verifies  the database and version. If it doesn't exist,
-// it is created.
-function initiateIndexDB() {
-
-    const dbName = "Juurnii";
-    const dbVersion = "1.0";
-    const request = indexedDB.open(dbName,dbVersion);
-    
-    //databases and datastores (tables) are created in this callback.
-    request.onupgradeneeded = e => {
-        
-        db = e.target.result;
-
-        // create the data store and define the key field.
-        db.createObjectStore("journal_entries",{keyPath:"logdate"});
-        
-        console.log(`upgrade is called on database name: ${db.name} version : ${db.version}`);
-    };
-
-    // the datastore can be read/viewed at during this callback.
-    request.onsuccess = e => {
-
-        db = e.target.result;
-        console.log(`success is called on database name: ${db.name} version : ${db.version}`);
-    };
-
-    // there has been an error accessing the database or the datastore.
-    request.onerror = e => {
-        console.log('error');
-    };
 }
 
 function resetForm(){
@@ -168,8 +168,8 @@ $(document).ready(function () {
         weekArray:['dim','lun','mar','mer','jeu','ven','sam'],
         date: new Date(year,month,day),
         onSelected: function (view, date, data) {
-            console.log('view:' + view)
-            console.log('date:' + date)
+            console.log('view:' + view);
+            console.log('date:' + date);
             console.log('data:' + (data || ''));
             
             // update the post date on calendar item selection.
@@ -179,7 +179,7 @@ $(document).ready(function () {
             titleElement.focus();
         },
         viewChange: function (view, y, m) {
-            console.log(view, y, m)
+            console.log(view, y, m);
         }
     });
 
