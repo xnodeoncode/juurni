@@ -11,7 +11,7 @@ const textElement = document.getElementById("entry-text");
 var postDate = new Date();
 var calendarData = {};
 var dailyEntries = [];
-let db = null;
+var db = null;
 
 // this process runs on page launch. the api verifies  the database and version. If it doesn't exist,
 // it is created.
@@ -19,7 +19,7 @@ function initiateIndexDB() {
 
     const dbName = "Juurnii";
     const dbVersion = "1.0";
-    const request = indexedDB.open(dbName,dbVersion);
+    let request = indexedDB.open(dbName,dbVersion);
     
     //databases and datastores (tables) are created in this callback.
     request.onupgradeneeded = e => {
