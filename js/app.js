@@ -164,8 +164,8 @@ $(document).ready(function () {
     let $ca = $('#calendrier').calendar({
         view: 'date',
         data: data,
-        monthArray: ['jan', 'fev', 'mar', 'avr', 'mai', 'jui', 'juil', 'aou', 'sep', 'oct', 'nov', 'dec'],
-        weekArray:['dim','lun','mar','mer','jeu','ven','sam'],
+        monthArray: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'],
+        weekArray:['sun','mon','tue','wed','thu','fri','sat'],
         date: new Date(year,month,day),
         onSelected: function (view, date, data) {
             console.log('view:' + view);
