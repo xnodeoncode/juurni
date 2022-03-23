@@ -1,6 +1,6 @@
 # juurni
 
-A project for test driving indexedDB in the browser. [Juurni](https://bacardibryant.github.io/juurni/ "Juurni") is a browser based daily journaling app that allows users to select a calendar date and add ideas, memories, moments, notes, recollections, you name it, for the day.
+A project for test driving indexedDB in the browser. [Juurni](https://xnodeoncode.github.io/juurni/ "Juurni") is a browser based daily journaling app that allows users to select a calendar date and add ideas, memories, moments, notes, recollections, you name it, for the day.
 
 Each journal entry is saved to the browsers indexeddb as a key/pair object. Being that this project was just an exploration of indexedDB, not all CRUD actions have been implemented.
 
