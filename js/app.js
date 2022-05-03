@@ -183,7 +183,6 @@ $(document).ready(function () {
     let year = now.getFullYear();
     let month = now.getMonth();
     let day = now.getDate();
-    //do i need a token
 
     // inline
     let $ca = $(calendarElementId).calendar({
