@@ -1,21 +1,21 @@
 "use strict";
 
 // ui hooks.
-const btnSave = document.getElementById("btn-save")
+const saveButton = document.getElementById("btn-save")
                         .addEventListener("click", saveEntry);
 
 const titleElement = document.getElementById("entry-title");
 const textElement = document.getElementById("entry-text");
 const calendarElement = document.getElementById("#calendrier");
-const postList = document.getElementById("postList");
+const postListContainer = document.getElementById("postList");
 
 
 // global variable to hold a reference to the database.
 const dbName = "Juurnii";
 const dbVersion = "1.0";
-const tableName = "journal_entries";
+const objectStoreName = "journal_entries";
 const keyPathField = "logdate";
-const dbModes = {
+const dbTransactionModes = {
     ReadWrite:"readwrite",
     ReadOnly:"read"
 }
@@ -46,7 +46,7 @@ function initiateIndexDB() {
         db = e.target.result;
 
         // create the data store and define the key field.
-        db.createObjectStore(tableName,{keyPath:keyPathField})
+        db.createObjectStore(objectStoreName,{keyPath:keyPathField})
             .createIndex("by_date","date",{unique: false});
         
         console.log(`upgrade is called on database name: ${db.name} version : ${db.version}`);
@@ -73,10 +73,10 @@ initiateIndexDB();
 function getEntries(){
 
     // connect to the data store
-    let tx = db.transaction(tableName)
-                .objectStore(tableName);
+    let tx = db.transaction(objectStoreName)
+                .objectStore(objectStoreName);
     
-    postList.innerHTML = "";
+    postListContainer.innerHTML = "";
 
     // request a cursor object to hold the results
     // onsuccess of reading the datasore, obtain the cursor object into a variable.
@@ -94,7 +94,7 @@ function getEntries(){
             li.innerText = cursor.value.title;
             li.className="list-group-item";
 
-            postList.append(li);
+            postListContainer.append(li);
 
             // go to next row. call required for iteration.
             cursor.continue();
@@ -148,13 +148,13 @@ function saveEntry(){
     };
 
     // connect to the datastore that was created in the onupgradeneeded callback.
-    let tx = db.transaction(tableName, dbModes.ReadWrite);
+    let tx = db.transaction(objectStoreName, dbTransactionModes.ReadWrite);
 
     // trap and respond to errors.
     tx.onerror = e=> console.log(`Error! ${e.target.error}`);
 
     // read the datastore into memory.
-    let entries = tx.objectStore(tableName);
+    let entries = tx.objectStore(objectStoreName);
 
     // add the record to the datastore.
     entries.add(entry);
