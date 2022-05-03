@@ -225,7 +225,7 @@
     }
 
     Date.isLeap = function (y) {
-        return (y % 100 !== 0 && y % 4 === 0) || (y % 400 === 0);
+        return (y % 100 !== 0 && y % 4 === 0) || (y % 400 === 0); 
     }
 
     Date.getDaysNum = function (y, m) {

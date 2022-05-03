@@ -1,24 +1,43 @@
+"use strict";
 
 // ui hooks.
-const btnSave = document.getElementById("btn-save");
-btnSave.addEventListener("click", saveEntry);
+const btnSave = document.getElementById("btn-save")
+                        .addEventListener("click", saveEntry);
 
 const titleElement = document.getElementById("entry-title");
 const textElement = document.getElementById("entry-text");
+const calendarElement = document.getElementById("#calendrier");
+const postList = document.getElementById("postList");
+
 
 // global variable to hold a reference to the database.
+const dbName = "Juurnii";
+const dbVersion = "1.0";
+const tableName = "journal_entries";
+const keyPathField = "logdate";
+const dbModes = {
+    ReadWrite:"readwrite",
+    ReadOnly:"read"
+}
+var db = null;
 
+// global variables to pass values between functions.
 var postDate = new Date();
 var calendarData = {};
 var dailyEntries = [];
-var db = null;
+var journalDb = {};
+var index = {};
+var tdate = new Date();
+
+// application constants
+const defaultTitle = "Untitled";
+const emptyBodyWarning = "warning: entries with no text are not saved.";
+const calendarElementId = "#calendrier";
 
 // this process runs on page launch. the api verifies  the database and version. If it doesn't exist,
 // it is created.
 function initiateIndexDB() {
-
-    const dbName = "Juurnii";
-    const dbVersion = "1.0";
+    
     let request = indexedDB.open(dbName,dbVersion);
     
     //databases and datastores (tables) are created in this callback.
@@ -27,7 +46,8 @@ function initiateIndexDB() {
         db = e.target.result;
 
         // create the data store and define the key field.
-        db.createObjectStore("journal_entries",{keyPath:"logdate"});
+        db.createObjectStore(tableName,{keyPath:keyPathField})
+            .createIndex("by_date","date",{unique: false});
         
         console.log(`upgrade is called on database name: ${db.name} version : ${db.version}`);
     };
@@ -36,6 +56,8 @@ function initiateIndexDB() {
     request.onsuccess = e => {
 
         db = e.target.result;
+        //db.createIndex("by_date","date",{unique: false});
+
         console.log(`success is called on database name: ${db.name} version : ${db.version}`);
     };
 
@@ -51,17 +73,15 @@ initiateIndexDB();
 function getEntries(){
 
     // connect to the data store
-    var tx = db.transaction("journal_entries","readonly");
+    let tx = db.transaction(tableName)
+                .objectStore(tableName);
     
-    // read the datastore into memory
-    var entries = tx.objectStore("journal_entries");
+    postList.innerHTML = "";
 
-    // request a curor object to hold the results
-    var request = entries.openCursor();
-
+    // request a cursor object to hold the results
     // onsuccess of reading the datasore, obtain the cursor object into a variable.
-    request.onsuccess = e=> {
-        var cursor = e.target.result;
+    tx.openCursor().onsuccess = e => {
+        let cursor = e.target.result;
         if(cursor){
 
             //process current row
@@ -70,8 +90,16 @@ function getEntries(){
             // add the current value to the collection.
             dailyEntries.push(cursor.value);
 
+            let li = document.createElement("li");
+            li.innerText = cursor.value.title;
+            li.className="list-group-item";
+
+            postList.append(li);
+
             // go to next row. call required for iteration.
             cursor.continue();
+        } else{
+            console.log("no entries remaining.")
         }
     };
 }
@@ -81,44 +109,33 @@ function saveEntry(){
     
     //entry template
     /* journalEntry = {
-        logdate: "getMonth()+getDate()+getFullYear()+getHours()+getMinutes()" 070519731213 (July 5, 1973 12:13 pm) non-utc
+        logdate:now.getTime() | current date/time in milliseconds since January 1, 1970
+        dateOffset:
         title:"Title",
         text: "What happened today?",
-        date: getDate()
+        date: postDate.getDate() | the current date or the selected date from calendar plug in.
     }*/
 
     //read from ui elements.
     let entryTitle = titleElement.value;
     let entryText = textElement.value;
 
-    // build the long date from the selected post date.
-    let dateString = postDate.toDateString();
-    let timeString = postDate.toTimeString();
-    let fullDateString = dateString + " " + timeString;
-    
-    //build the timestamp from date parts
-    let mm = (postDate.getMonth() + 1).toString();
-    let dd = postDate.getDate().toString();
-    let yy = postDate.getFullYear().toString();
-
-    // the calendar provides the date, the time is calculated based on the current time.
+    // set the key field value based on the current date/time.
+    // the calendar provides the post date, the time is calculated based on the current time.
     let now = new Date();
-    let hh = now.getHours().toString();
-    let min = now.getMinutes().toString();
+    let keyField = now.getTime();
 
-    // append time to the postDate variable
-    postDate.setHours(now.getHours());
-    postDate.setMinutes(now.getMinutes());
+    // set the time for the postDate to the current time
+    postDate.setHours(now.getHours(),now.getMinutes(),now.getSeconds());
 
-    let keyField = mm + dd + yy + hh + min;
 
     // if no title is provided then name it untitled.
     if(entryTitle.length === 0)
-        entryTitle = "Untitled";
+        entryTitle = defaultTitle;
         
     //if the entry text is blank, just return don't save a blank record.
     if(entryText.length === 0 || entryText === ""){
-        console.log("warning: entries with no text are not saved.");
+        console.log(emptyBodyWarning);
         return;
     }
 
@@ -126,24 +143,31 @@ function saveEntry(){
     const entry = {
         logdate: keyField,
         title: entryTitle,
-        date: fullDateString,
+        date: postDate.toString(),
         text: entryText
     };
 
     // connect to the datastore that was created in the onupgradeneeded callback.
-    var tx = db.transaction("journal_entries", "readwrite");
+    let tx = db.transaction(tableName, dbModes.ReadWrite);
 
     // trap and respond to errors.
     tx.onerror = e=> console.log(`Error! ${e.target.error}`);
 
     // read the datastore into memory.
-    var jEntries = tx.objectStore("journal_entries");
+    let entries = tx.objectStore(tableName);
 
     // add the record to the datastore.
-    jEntries.add(entry);
+    entries.add(entry);
 
     $('.toast').toast('show');
+
+    //persist database
+    document.cookie = "journal_entries=" + entries.toString();
+
+    console.log(entries.toString());
+
     resetForm();
+    getEntries();
 }
 
 function resetForm(){
@@ -161,7 +185,7 @@ $(document).ready(function () {
     let day = now.getDate();
 
     // inline
-    let $ca = $('#calendrier').calendar({
+    let $ca = $(calendarElementId).calendar({
         view: 'date',
         data: data,
         monthArray: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'],
