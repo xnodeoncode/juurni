@@ -27,7 +27,6 @@ var calendarData = {};
 var dailyEntries = [];
 var journalDb = {};
 var index = {};
-var tdate = new Date();
 
 // application constants
 const defaultTitle = "Untitled";
