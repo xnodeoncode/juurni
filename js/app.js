@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 // ui hooks.
 const saveButton = document.getElementById("btn-save")
@@ -34,7 +34,7 @@ const defaultTitle = "Untitled";
 const emptyBodyWarning = "warning: entries with no text are not saved.";
 const calendarElementId = "#calendrier";
 
-// this process runs on page launch. the api verifies  the database and version. If it doesn't exist,
+// this process runs on page launch. the api verifies the database and version. If it doesn't exist,
 // it is created.
 function initiateIndexDB() {
     
@@ -45,7 +45,7 @@ function initiateIndexDB() {
         
         db = e.target.result;
 
-        // create the data store and define the key field.
+        // create the datastore and define the key field.
         db.createObjectStore(objectStoreName,{keyPath:keyPathField})
             .createIndex("by_date","date",{unique: false});
         
@@ -56,7 +56,6 @@ function initiateIndexDB() {
     request.onsuccess = e => {
 
         db = e.target.result;
-        //db.createIndex("by_date","date",{unique: false});
 
         console.log(`success is called on database name: ${db.name} version : ${db.version}`);
     };
@@ -69,17 +68,17 @@ function initiateIndexDB() {
 
 initiateIndexDB();
 
-// read all current entries in the indexDB
+// read all current entries in the indexedDB
 function getEntries(){
 
-    // connect to the data store
+    // connect to the datastore
     let tx = db.transaction(objectStoreName)
                 .objectStore(objectStoreName);
     
     postListContainer.innerHTML = "";
 
     // request a cursor object to hold the results
-    // onsuccess of reading the datasore, obtain the cursor object into a variable.
+    // onsuccess of reading the datastore, obtain the cursor object into a variable.
     tx.openCursor().onsuccess = e => {
         let cursor = e.target.result;
         if(cursor){
@@ -104,13 +103,12 @@ function getEntries(){
     };
 }
 
-// add a record to the datastor using a indexdb transaction.
+// add a record to the datastore using a indexeddb transaction.
 function saveEntry(){
     
     //entry template
     /* journalEntry = {
         logdate:now.getTime() | current date/time in milliseconds since January 1, 1970
-        dateOffset:
         title:"Title",
         text: "What happened today?",
         date: postDate.getDate() | the current date or the selected date from calendar plug in.
@@ -207,7 +205,6 @@ $(document).ready(function () {
         }
     });
 
-    // feather.replace()
     getEntries();
     titleElement.focus();
 
