@@ -6,7 +6,7 @@ const saveButton = document.getElementById("btn-save")
 
 const titleElement = document.getElementById("entry-title");
 const textElement = document.getElementById("entry-text");
-const calendarElement = document.getElementById("#calendrier");
+const calendarElement = document.getElementById("calendrier");
 const postListContainer = document.getElementById("postList");
 
 
