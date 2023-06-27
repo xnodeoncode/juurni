@@ -63,6 +63,7 @@ function initiateIndexDB() {
     request.onerror = e => {
         console.log('error');
     };
+    
 }
 
 initiateIndexDB();
