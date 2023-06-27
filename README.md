@@ -10,7 +10,10 @@ I do not plan to create a release version of this the project as there are many,
 
 Juurnii makes use of the calendar plugin offered by [YSCoder](https://github.com/yscoder/Calendar "YSCoder").
 
-This application has a browser dependency on indexedDB.
+## Dependencies
+* Calendar by YS Coder
+* JQuery
+* Browser support for IndexedDB
 
 ## Features
 
@@ -18,4 +21,4 @@ Juurni uses a few features such as:
 
 * IndexedDB
 * Toast notifications
-* Calendar
+* Calendar by YSCoder
