@@ -148,6 +148,7 @@ function saveEntry() {
 
   resetForm();
   getEntries();
+  loadEntriesForDate(postDate);
 }
 
 function resetForm() {
