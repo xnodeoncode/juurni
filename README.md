@@ -20,9 +20,10 @@ Juurnii makes use of the calendar plugin offered by [YSCoder](https://github.com
 
 Juurni uses a few features such as:
 
-* LocalStorage / IndexedDB
-* Toast notifications
-* Calendar by YSCoder
+- LocalStorage / IndexedDB
+- Toast notifications
+- Calendar by YSCoder
 
 ## Versions
+
 [Juurni v1](https://xnodeoncode.github.io/juurni/v1/)
